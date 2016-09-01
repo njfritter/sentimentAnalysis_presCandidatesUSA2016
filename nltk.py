@@ -266,7 +266,6 @@ def train_and_evaluate(model_call):
     print ('Predictions: {}'.format(str(y)))
 
 
-
 """    
 word_features = get_word_features(get_words_in_tweets(tweets))
 print("word features made")
