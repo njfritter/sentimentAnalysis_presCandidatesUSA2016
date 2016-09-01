@@ -11,4 +11,4 @@ ADDITIONAL RESOURCES
 We used the following documentation to further educate ourselves through the process of this project.
 
 
- -  [Larent Luce's Blog : Twitter sentiment analysis using Python and NLTK](http://www.laurentluce.com/posts/twitter-sentiment-analysis-using-python-and-nltk/)
+ - [Larent Luce's Blog : Twitter sentiment analysis using Python and NLT]K(http://www.laurentluce.com/posts/twitter-sentiment-analysis-using-python-and-nltk/)
