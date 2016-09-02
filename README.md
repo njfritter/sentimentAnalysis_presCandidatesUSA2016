@@ -30,6 +30,7 @@ The following dependences (in Python) are required to run this program:
 -random
 -numpy
 -pandas
+-time
 
 STEPS REQUIRED
 
