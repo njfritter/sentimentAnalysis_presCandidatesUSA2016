@@ -11,6 +11,7 @@ import csv
 import sys
 import random
 import numpy as np
+import time
 
 import nltk
 """
@@ -42,28 +43,52 @@ def get_word_features(wordlist):
     word_features = wordlist.keys()
     return word_features
 
-file = "output.csv"
+file = "tweets.csv"
+
+columns = [
+    "row_id",
+    "tweet_id",
+    "timestamp",
+    "president",
+    "tweet"
+    ]
 
 train_columns = [
-    "word",
+    "row_id",
+    "tweet_id",
+    "day",
+    "month",
+    "president",
+    "tweet",
     "label"
-]
+    ]
 
 test_columns = [
-    "word",
+    "row_id",
+    "tweet_id",
+    "day",
+    "month",
+    "president",
+    "tweet",
     "label"
-]
+    ]
 
 categorical_columns = [
-    "word"
-]
+    "row_id",
+    "tweet_id",
+    "day",
+    "month",
+    "president",
+    "tweet",
+    "label"
+    ]
 continuous_columns = []
 
 labels = []
 
 local_stopwords = []
 
-
+"""
 # A set of positive and negative tweets
 pos_tweets = [('I love this car', 'positive'),
               ('This view is amazing', 'positive'),
@@ -93,6 +118,7 @@ test_tweets = [
     (['not', 'like', 'that', 'man'], 'negative'),
     (['house', 'not', 'great'], 'negative'),
     (['your', 'song', 'annoying'], 'negative')]
+"""
 
 word_features = get_word_features(get_words_in_tweets(tweets))
 print("word features made")
@@ -116,17 +142,17 @@ print feature_probdist[('negative', 'contains(best)')].prob(True)
 print classifier.show_most_informative_features(32)
 
 
-"""
+
 def parse_csv():
     # Here we will parse a json file with trello data inside into a CSV file
     # With the data on Card Id, Title, Descriptions, and Labels
-    with open(file) as f:
-        data = json.load(f)
+    # with open(file) as f:
+    #    data = json.load(f)
 
     train_file = csv.writer(open("train.csv", "wb+"))
     test_file = csv.writer(open("test.csv", "wb+"))
     # unlabeled_file = csv.writer(open("unlabeled.csv", "wb+"))
-    # tweet_file = csv.reader(open("output.csv", "rb"))
+    tweet_file = csv.reader(open("tweets.csv", "rb"))
 
     # Write headers
     train_file.writerow(train_columns)
@@ -141,21 +167,25 @@ def parse_csv():
     labels.append(0, 1)
 
     # Now shuffle them
-    random.shuffle(tweets)
+    random.shuffle(tweet_file)
 
     index = 0
     
-    for row in tweets:
+    for row in tweet_file:
+        row = (row_id, tweet_id, timestamp, president, tweet)
+        timestamp = time.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
         # Here we will split up the data into 2/3 training and 1/3 test
         ratio = 3
 
+        """
         if len(card['labels']) == 0:
             print(card['id'])
             #unlabeled_file.writerow([card['id'], tokenize_row_write(unlabeled_file, card['name'], card['desc'], "")])
             #unlabeled_file.writerow([card['id'], card['name'], ""])
             tokenize_row_write(unlabeled_file, card['id'], card['name'], card['desc'], "")
             continue
-
+            """
+        
         write_to_file = None
         if index % ratio == 0:
             write_to_file = test_file
@@ -164,7 +194,7 @@ def parse_csv():
 
         label = row[1]
         print(label)
-        tokenize_row_write(write_to_file, index, card['name'], card['desc'], label)
+        tokenize_row_write(write_to_file, row_id, tweet_id, timestamp.tm_wday, timestamp.tm_hour, president, tweet)
 
         index += 1
 
@@ -191,6 +221,5 @@ def tokenize_row_write(file_csv_writer, tweet, card_name, card_desc, label):
 
     #file_csv_writer.writerow([words] + [label])
 
-"""
 
 
