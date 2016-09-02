@@ -43,7 +43,7 @@ labels = []
 
 local_stopwords = []
 
-
+"""
 # A set of positive and negative tweets
 pos_tweets = [('I love this car', 'positive'),
               ('This view is amazing', 'positive'),
@@ -74,15 +74,17 @@ test_tweets = [
     (['house', 'not', 'great'], 'negative'),
     (['your', 'song', 'annoying'], 'negative')]
 
-
+"""
 def parse_csv():
     # Here we will parse a json file with trello data inside into a CSV file
     # With the data on Card Id, Title, Descriptions, and Labels
-    # with open(file) as f:
-        
+    with open(file) as f:
+        data = json.load(f)
+
     train_file = csv.writer(open("train.csv", "wb+"))
     test_file = csv.writer(open("test.csv", "wb+"))
     # unlabeled_file = csv.writer(open("unlabeled.csv", "wb+"))
+    # tweet_file = csv.reader(open("output.csv", "rb"))
 
     """
     Write headers
@@ -90,8 +92,10 @@ def parse_csv():
     test_file.writerow(test_columns)
     """
 
-    # Since the Tensorflow DNN (Deep Neural Network) wants the response variable in terms of numbers
-    # Here we will change the labels into numbers (0 for positive, 1 for negative)
+    tweets = tweet_file["json_output"]
+    # Since the Tensorflow DNN (Deep Neural Network) wants the
+    # response variable in terms of numbers Here we will change the
+    # labels into numbers (0 for positive, 1 for negative)
 
     labels.append(0, 1)
 
@@ -99,7 +103,7 @@ def parse_csv():
     random.shuffle(tweets)
 
     index = 0
-
+    
     for row in tweets:
         # Here we will split up the data into 2/3 training and 1/3 test
         ratio = 3
@@ -122,7 +126,6 @@ def parse_csv():
         tokenize_row_write(write_to_file, index, card['name'], card['desc'], label)
 
         index += 1
-
 
 def clean_word(word):
     return word not in stopwords.words('english') and word not in local_stopwords
