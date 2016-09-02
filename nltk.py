@@ -57,9 +57,6 @@ neg_tweets = [('I do not like this car', 'negative'),
               ('He is my enemy', 'negative')]
 
 tweets = []
-for (words, sentiment) in pos_tweets + neg_tweets:
-    words_filtered = [word.lower() for word in words.split() if len(word) >= 3] 
-    tweets.append((words_filtered, sentiment))
 
 print("Tweets made")
     
@@ -315,3 +312,4 @@ def get_word_features(wordlist):
     word_features = wordlist.keys()
     return word_features
 """
+
