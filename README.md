@@ -12,3 +12,17 @@ We used the following documentation to further educate ourselves through the pro
 
 
  - [Larent Luce's Blog : Twitter sentiment analysis using Python and NLT]K(http://www.laurentluce.com/posts/twitter-sentiment-analysis-using-python-and-nltk/)
+
+  - This tutorial is used to build nltk
+
+ - [Mining Twitter with Python - by CodeKitchen](http://web.mit.edu/aizhan/www/twitter_api_workshop/#/)
+
+  - This tutorial is used to build file tweetsByHandle.py, handles.csv, and handles.db
+
+--
+
+METHOD
+
+ - Scrape data from Twitter
+
+ - 
