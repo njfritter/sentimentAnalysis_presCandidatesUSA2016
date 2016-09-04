@@ -24,21 +24,21 @@ DEPENDENCIES REQUIRED
 
 The following dependences (in Python) are required to run this program:
 
--nltk 
--json
--csv
--random
--numpy
--pandas
--time
+    -nltk 
+    -json
+    -csv
+    -random
+    -numpy
+    -pandas
+    -time
 
 STEPS REQUIRED
 
 .
+.	
 .
 .
-.
-(Convert the .db file into a json file)[http://stackoverflow.com/questions/3286525/return-sql-table-as-json-in-python]
+[Convert the .db file into a json file](http://stackoverflow.com/questions/3286525/return-sql-table-as-json-in-python)
 
 
 METHOD

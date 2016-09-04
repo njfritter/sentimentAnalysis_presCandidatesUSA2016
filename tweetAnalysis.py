@@ -1,31 +1,23 @@
 # Here for this project we will be analyzing Tweets about the
 # Presidential Candidates by word, tokenizing them, and then using
 # them to classify each overall tweet as either positive or negative
-# Here we will import the Tensorflow libraries among others necessary
+# Here we will import the Scikit Learn libraries among others necessary
 
-import tempfile
 import pandas as pd
-import tensorflow as tf
-import json
 import csv
 import sys
 import random
 import numpy as np
 import time
 from time import strftime
+from pandas import DataFrame.query
 
 import nltk
-from nltk.probability import FreqDist
 from nltk import corpus
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
- #nltk.download('punkt')
- #nltk.download('stopwords')
-from nltk.classify import NaiveBayesClassifier
-from nltk.corpus import subjectivity
-from nltk.sentiment import SentimentAnalyzer
-from nltk.sentiment.util import *
-from nltk.corpus import CategorizedPlaintextCorpusReader
+nltk.download('punkt')
+nltk.download('stopwords')
  
 from sklearn import datasets
 from sklearn.naive_bayes import GaussianNB
@@ -85,16 +77,15 @@ labels = []
 local_stopwords = []
 
 def parse_csv():
-    # Here we will parse a json file with trello data inside into a CSV file
-    # With the data on Card Id, Title, Descriptions, and Labels
-    # with open(file) as f:
-    #    data = json.load(f)
-    
+    # Here we will parse a json file with trello data inside into a
+    # CSV file with the data on Row ID, Tweet ID, Timestamp,
+    # President, Tweet
+
     train_file = csv.writer(open("train.csv", "wb+"))
     test_file = csv.writer(open("test.csv", "wb+"))
     unlabeled_file = csv.writer(open("unlabeled.csv", "wb+"))
     tweet_file = csv.reader(open("tweets_two.csv", "rb"))
-    print("Files read")
+
     """ 
     # Write headers
     train_file.writerow(train_columns)
@@ -124,8 +115,6 @@ def parse_csv():
         
         if len(label) == 0:
             print(row_id)
-             #unlabeled_file.writerow([card['id'], tokenize_row_write(unlabeled_file, card['name'], card['desc'], "")])
-             #unlabeled_file.writerow([card['id'], card['name'], ""])
             tokenize_row_write(unlabeled_file, row_id, tweet_id, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, "")
             continue
         
@@ -157,11 +146,6 @@ def tokenize_row_write(file_csv_writer, row_id, tweet_id, day, hour, president, 
     words_tweet = tokenized_string(tweet)
 
     file_csv_writer.writerow([row_id] + [tweet_id] + [day] + [hour] + [president]+ [words_tweet] + [label])
-    
-    """
-    for word in words:
-    file_csv_writer.writerow([card_id, word, label])
-    """    
     
  
 def extract_and_train():
