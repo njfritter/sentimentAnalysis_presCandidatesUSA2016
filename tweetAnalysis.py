@@ -266,7 +266,7 @@ def extract_and_train():
     """ Extract features from text files """
 
     count_vect = CountVectorizer()
-    X_train_counts = count_vect.fit_transform(train['tweet'])
+    X_train_counts = count_vect.fit_transform(train_words)
     print(X_train_counts.shape)
 
     tfidf_transformer = TfidfTransformer()
@@ -278,8 +278,8 @@ def extract_and_train():
     clf = MultinomialNB().fit(X_train_tfidf, y_train)
     print("Model fitted")
 
-    test_words = ['Our plan promises to revive the economy and build jobs. Trump will destroy the middle class and feed his pockets']
-    X_new_counts = count_vect.transform(test_words)
+    test_sentence = ['Our plan promises to revive the economy and build jobs. Trump will destroy the middle class and feed his pockets']
+    X_new_counts = count_vect.transform(test_sentence)
     X_new_tfidf = tfidf_transformer.transform(X_new_counts)
     print("Test data transformed")
 
@@ -305,12 +305,39 @@ def naive_bayes(x_train, y_train, x_test, y_test):
     """ Evaluate performance on test set """
 
     predicted = text_clf.predict(x_test)
-    print("The accuracy of a Naive Bayes algorithm is: %d" % np.mean(predicted == y_test))
+    #print("The accuracy of a Naive Bayes algorithm is: %d" % np.mean(predicted == y_test))
+    print("The accuracy of a Naive Bayes algorithm is: %d" % float((((y_test != predicted).sum()) / x_test.shape[0])))
     print("Number of mislabeled points out of a total %d points : %d"
-          % (len(x_test),(y_test != predicted).sum()))
+          % (x_test.shape[0],(y_test != predicted).sum()))
 
-    parameter_tuning(text_clf)
+    parameter_tuning(text_clf, x_train, y_train)
 
+def parameter_tuning(text_clf, x_train, y_train):
+    """ Classifiers can have many different parameters that can make the                                                                                                             
+    algorithm more accurate (MultinomialNB() has a smoothing                                                                                                                         
+    parameter, SGDClassifier has a penalty parameter, etc.). Here we                                                                                                                 
+    will run an exhaustive list of the best possible parameter values """
+
+    parameters = {'vect__ngram_range': [(1, 1), (1, 2)],
+              'tfidf__use_idf': (True, False),
+              'clf__alpha': (1e-2, 1e-3),
+    }
+
+    gs_clf = GridSearchCV(text_clf, parameters, n_jobs=-1)
+
+    gs_clf = gs_clf.fit(x_train, y_train)
+
+    best_parameters, score, _ = max(gs_clf.grid_scores_, key=lambda x: x[1])
+    for param_name in sorted(parameters.keys()):
+        print("%s: %r" % (param_name, best_parameters[param_name]))
+
+
+    print(score)
+
+    """                                                                                                                                                                              
+    print(metrics.classification_report(y_test, predicted,                                                                                                                           
+    target_names=twenty_test.target_names))                                                                                                                                          
+    """
 
 parse_csv()
 extract_and_train()
