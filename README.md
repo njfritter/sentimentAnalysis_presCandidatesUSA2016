@@ -24,13 +24,12 @@ DEPENDENCIES REQUIRED
 
 The following dependences (in Python) are required to run this program:
 
-    -nltk 
-    -json
-    -csv
-    -random
-    -numpy
-    -pandas
-    -time
+    nltk 
+    csv
+    random
+    numpy
+    pandas
+    time
 
 STEPS REQUIRED
 
@@ -38,8 +37,11 @@ STEPS REQUIRED
 .	
 .
 .
-[Convert the .db file into a json file](http://stackoverflow.com/questions/3286525/return-sql-table-as-json-in-python)
+[Convert the .db file into a csv file](http://stackoverflow.com/questions/3286525/return-sql-table-as-json-in-python)
 
+Use the this code below:
+
+    python tweetAnalysis.py
 
 METHOD
 
@@ -47,3 +49,7 @@ METHOD
 
  - 
 
+
+FINDINGS 
+
+It took Hillary 11 days to get to 200 tweets and Trump 16 days to get there

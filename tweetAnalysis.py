@@ -10,7 +10,7 @@ import random
 import numpy as np
 import time
 from time import strftime
-from pandas import DataFrame.query
+#from pandas.DataFrame import query
 
 import nltk
 from nltk import corpus
@@ -84,8 +84,8 @@ def parse_csv():
     train_file = csv.writer(open("train.csv", "wb+"))
     test_file = csv.writer(open("test.csv", "wb+"))
     unlabeled_file = csv.writer(open("unlabeled.csv", "wb+"))
-    tweet_file = csv.reader(open("tweets_two.csv", "rb"))
-
+    #tweet_file = csv.reader(open("tweets_two.csv", "rb"))
+    
     """ 
     # Write headers
     train_file.writerow(train_columns)
@@ -101,8 +101,14 @@ def parse_csv():
     labels.append("neutral")
     
     # Now shuffle them
-    # random.shuffle(tweet_file)
+    with open('tweets_two.csv','rb') as source:
+        data = [ (random.random(), line) for line in source ]
+    data.sort()
+    with open('randomized_tweets.csv','wb+') as target:
+        for _, line in data:
+            target.write( line )
     
+    tweet_file = csv.reader(open("randomized_tweets.csv", "rb"))
     index = 0
     
     for row in tweet_file:
