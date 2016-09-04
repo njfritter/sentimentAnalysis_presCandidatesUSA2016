@@ -1,0 +1,3 @@
+id	screen_name	name	created_at	url	followers_count	friends_count	statuses_count	favorites_count	listed_count	contributors_enabled	description	protected	location	lang	expanded_url
+1339835893	HillaryClinton	Hillary Clinton	Tue Apr 09 18:04:35 +0000 2013	https://t.co/xhPHAcvdoc	8558117	746	7770		30460	False	Wife, mom, grandma, women+kids advocate, FLOTUS, Senator, SecState, hair icon, pantsuit aficionado, 2016 presidential candidate. Tweets from Hillary signed –H	False	New York, NY	en	http://HillaryClinton.com
+25073877	realDonaldTrump	Donald J. Trump	Wed Mar 18 13:46:38 +0000 2009	https://t.co/mZB2hymxC9	11263394	42	33075		38076	False	#TrumpPence16	False	New York, NY	en	http://www.DonaldJTrump.com
