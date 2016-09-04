@@ -307,7 +307,7 @@ def naive_bayes(x_train, y_train, x_test, y_test):
     predicted = text_clf.predict(x_test)
     print("The accuracy of a Naive Bayes algorithm is: %d" % np.mean(predicted == y_test))
     print("Number of mislabeled points out of a total %d points : %d"
-          % (x_test.shape[0],(y_test != predicted).sum()))
+          % (len(x_test),(y_test != predicted).sum()))
 
     parameter_tuning(text_clf)
 
