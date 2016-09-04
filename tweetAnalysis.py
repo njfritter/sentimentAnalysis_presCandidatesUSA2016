@@ -81,17 +81,11 @@ def parse_csv():
     # CSV file with the data on Row ID, Tweet ID, Timestamp,
     # President, Tweet
 
-    train_file = csv.writer(open("train.csv", "wb+"))
-    test_file = csv.writer(open("test.csv", "wb+"))
+    training_file = csv.writer(open("training_data.csv", "wb+"))
+    testing_file = csv.writer(open("testing_data.csv", "wb+"))
     unlabeled_file = csv.writer(open("unlabeled.csv", "wb+"))
     #tweet_file = csv.reader(open("tweets_two.csv", "rb"))
-    
-    """ 
-    # Write headers
-    train_file.writerow(train_columns)
-    test_file.writerow(test_columns)
-    """
-    
+        
     # Since the Tensorflow DNN (Deep Neural Network) wants the
     # response variable in terms of numbers Here we will change the
     # labels into numbers (0 for positive, 1 for negative)
@@ -100,7 +94,8 @@ def parse_csv():
     labels.append("negative")
     labels.append("neutral")
     
-    # Now shuffle them
+    # This is how you randomize the data
+    # Gotten from Github
     with open('tweets_two.csv','rb') as source:
         data = [ (random.random(), line) for line in source ]
     data.sort()
@@ -111,6 +106,9 @@ def parse_csv():
     tweet_file = csv.reader(open("randomized_tweets.csv", "rb"))
     index = 0
     
+    # Now we will iterate through the randomized file and extract data
+    # We need to get rid of the decimal points in the seconds columns
+    # And then split up the data 
     for row in tweet_file:
         (row_id, tweet_id, timestamp, president, tweet, label) = row
         raw_timestamp = time.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
@@ -119,20 +117,21 @@ def parse_csv():
          # Here we will split up the data into 2/3 training and 1/3 test
         ratio = 3
         
-        if len(label) == 0:
+        # Take care of unlabeled data
+        if label == "1":
             print(row_id)
             tokenize_row_write(unlabeled_file, row_id, tweet_id, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, "")
             continue
         
         
-        write_to_file = None
+        write_to_csv = None
         if index % ratio == 0:
-            write_to_file = test_file
+            write_to_csv = testing_file
         else:
-            write_to_file = train_file
+            write_to_csv = training_file
             
         print(label)
-        tokenize_row_write(write_to_file, row_id, tweet_id, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, label)
+        tokenize_row_write(write_to_csv, row_id, tweet_id, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, label)
             
         index += 1
 
@@ -200,7 +199,7 @@ def extract_and_train():
     naive_bayes(train_words, y_train, test_words, y_test)
  
 def naive_bayes(x_train, y_train, x_test, y_test):
-    """ Building a Pipeline; this does all of the work in train_NB() for you """ 
+    """ Building a Pipeline; this does all of the work in extract_and_train() for you """ 
     
     text_clf = Pipeline([('vect', CountVectorizer()),
                          ('tfidf', TfidfTransformer()),
@@ -218,8 +217,11 @@ def naive_bayes(x_train, y_train, x_test, y_test):
     print("Number of mislabeled points out of a total %d points : %d"
           % (x_test.shape[0],(y_test != predicted).sum()))
     
+    # Tune parameters
     parameter_tuning(text_clf, x_train, y_train)
-    
+    # Predict unlabeled tweets
+    predict_unlabeled_tweets(text_clf)
+
 def parameter_tuning(text_clf, x_train, y_train):
     """ Classifiers can have many different parameters that can make the                                                                                                                   
     algorithm more accurate (MultinomialNB() has a smoothing                                                                                                                               
@@ -247,13 +249,29 @@ def parameter_tuning(text_clf, x_train, y_train):
         target_names=twenty_test.target_names))                                                                                                                                                
         """
 
+def predict_unlabeled_tweets(classifier):
+    unlabeled_tweets = csv.reader(open("unlabeled.csv", "rb"))
+    predicted_tweets = csv.writer(open("predicted.csv", "wb+"))
+
+    for row in unlabeled_tweets:
+        (row_id, tweet_id, day, hour, president, tweet, label) = row
+        predicted = classifier.predict(tweet)
+        print('{} => {}').format(tweet, predicted)
+        
+        predicted_tweets.writerow([president] + [tweet] + [predicted])
+
+
+
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         if sys.argv[1] == 'parse':
             parse_csv()
         elif sys.argv[1] == 'train':
             extract_and_train()
-        
+        #elif sys.argv[1] == 'predict':
+        #    predict_tweets()
 
 
 
