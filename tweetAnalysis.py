@@ -61,6 +61,16 @@ test_columns = [
     "label"
     ]
 
+unlabeled_columns = [
+    "row_id",
+    "tweet_id",
+    "day",
+    "hour",
+    "president",
+    "tweet",
+    "label"
+    ]
+
 categorical_columns = [
     "row_id",
     "tweet_id",
@@ -77,9 +87,8 @@ labels = []
 local_stopwords = []
 
 def parse_csv():
-    # Here we will parse a json file with trello data inside into a
-    # CSV file with the data on Row ID, Tweet ID, Timestamp,
-    # President, Tweet
+    # Here we will parse a CSV file with the data on Row ID, Tweet ID,
+    # Timestamp, President, Tweet
 
     training_file = csv.writer(open("training_data.csv", "wb+"))
     testing_file = csv.writer(open("testing_data.csv", "wb+"))
@@ -95,7 +104,8 @@ def parse_csv():
     labels.append("neutral")
     
     # This is how you randomize the data
-    # Gotten from Github
+    # Gotten from Github: 
+    # (http://stackoverflow.com/questions/4618298/randomly-mix-lines-of-3-million-line-file)
     with open('tweets_two.csv','rb') as source:
         data = [ (random.random(), line) for line in source ]
     data.sort()
@@ -108,13 +118,12 @@ def parse_csv():
     
     # Now we will iterate through the randomized file and extract data
     # We need to get rid of the decimal points in the seconds columns
-    # And then split up the data 
+    # And then split up the data (2/3 train and 1/3 test)
     for row in tweet_file:
         (row_id, tweet_id, timestamp, president, tweet, label) = row
         raw_timestamp = time.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
         correct_format  = "%Y-%m-%d %H:%M:%S"
         timestamp = strftime(correct_format, raw_timestamp)
-         # Here we will split up the data into 2/3 training and 1/3 test
         ratio = 3
         
         # Take care of unlabeled data
@@ -212,8 +221,8 @@ def naive_bayes(x_train, y_train, x_test, y_test):
     """ Evaluate performance on test set """
     
     predicted = text_clf.predict(x_test)
-     #print("The accuracy of a Naive Bayes algorithm is: %d" % np.mean(predicted == y_test))
-    print("The accuracy of a Naive Bayes algorithm is: %d" % float((((y_test != predicted).sum()) / x_test.shape[0])))
+    #print("The accuracy of a Naive Bayes algorithm is: %d" % np.mean(predicted == y_test))
+    #print("The accuracy of a Naive Bayes algorithm is: %d" % (1 - float(((y_test != predicted).sum()) / x_test.shape[0])))
     print("Number of mislabeled points out of a total %d points : %d"
           % (x_test.shape[0],(y_test != predicted).sum()))
     
@@ -250,17 +259,20 @@ def parameter_tuning(text_clf, x_train, y_train):
         """
 
 def predict_unlabeled_tweets(classifier):
-    unlabeled_tweets = csv.reader(open("unlabeled.csv", "rb"))
     predicted_tweets = csv.writer(open("predicted.csv", "wb+"))
-
-    for row in unlabeled_tweets:
-        (row_id, tweet_id, day, hour, president, tweet, label) = row
-        predicted = classifier.predict(tweet)
-        print('{} => {}').format(tweet, predicted)
-        
-        predicted_tweets.writerow([president] + [tweet] + [predicted])
-
-
+    unlabeled_tweets = pd.read_csv("unlabeled.csv", names = unlabeled_columns)
+    
+    # Make predictions
+    unlabeled_words = np.array(unlabeled_tweets["tweet"])
+    predictions = classifier.predict(unlabeled_words)
+    print(predictions)
+    
+    # Iterate through csv and get president and tweet
+    # Add prediction to end
+    for row, prediction in zip(unlabeled_tweets, predictions):
+        #(row_id, tweet_id, day, hour, president, tweet, label) = row
+        #predicted_tweets.writerow([president] + [tweet] + [prediction])
+        predicted_tweets.writerow([row] + [prediction])
 
 
 
