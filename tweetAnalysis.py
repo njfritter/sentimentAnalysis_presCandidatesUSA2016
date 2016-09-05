@@ -259,21 +259,24 @@ def parameter_tuning(text_clf, x_train, y_train):
         """
 
 def predict_unlabeled_tweets(classifier):
-    predicted_tweets = csv.writer(open("predicted.csv", "wb+"))
-    unlabeled_tweets = pd.read_csv("unlabeled.csv", names = unlabeled_columns)
-    
     # Make predictions
+    unlabeled_tweets = pd.read_csv("unlabeled.csv", names = unlabeled_columns)
     unlabeled_words = np.array(unlabeled_tweets["tweet"])
     predictions = classifier.predict(unlabeled_words)
     print(predictions)
     
+    # Create new file for predictions
+    # And new way to extract data
+    predicted_tweets = csv.writer(open("predicted.csv", "wb+"))
+    unlabeled_tweets = csv.reader(open("unlabeled.csv", "rb+"))
+    
     # Iterate through csv and get president and tweet
     # Add prediction to end
-    for row, prediction in zip(unlabeled_tweets, predictions):
-        #(row_id, tweet_id, day, hour, president, tweet, label) = row
-        #predicted_tweets.writerow([president] + [tweet] + [prediction])
-        predicted_tweets.writerow([row] + [prediction])
-
+    index = 0
+    for row in unlabeled_tweets:
+        (row_id, tweet_id, day, hour, president, tweet, label) = row
+        predicted_tweets.writerow([president] + [tweet] + [predictions[index]])
+        index += 1
 
 
 if __name__ == '__main__':
