@@ -36,6 +36,8 @@ The following dependences (in Python) are required to run this program:
     numpy
     pandas
     time
+    sys (optional)
+    sklearn
 
 STEPS REQUIRED
 
