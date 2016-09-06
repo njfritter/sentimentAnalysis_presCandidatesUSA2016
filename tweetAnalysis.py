@@ -19,7 +19,7 @@ from time import strftime
 #from pandas.DataFrame import query
 import matplotlib.pyplot as plt
 #import seaborn
-#import pygal
+import pygal
 from IPython.display import SVG
 
 import nltk
@@ -332,7 +332,24 @@ def compare_predictions():
     
     print("The precent similarity between a Multinomial Naive Bayes Algorithm and a Linear SVM algorithm with a SGD Classifier is: ")
     print(np.mean(naive_bayes_pred == linear_svm_pred))
+
+    plot_predictions(naive_bayes_pred)
+    plot_predictions(linear_svm_pred)
+
+def plot_predictions(predictions):
     
+    pos_sent = len([k for k in predictions if k == "positive"]) / len(predictions)
+    neg_sent = len([k for k in predictions if k == "negative"]) / len(predictions)
+    neu_sent = len([k for k in predictions if k == "neutral"]) / len(predictions)
+
+    chart = pygal.HorizontalBar()
+    chart.title = 'Positive, Negative & Neutral Sentiment'
+    chart.add('Positive', pos_sent * 100)
+    chart.add('Negative', neg_sent * 100)
+    chart.add('Neutral', neu_sent * 100)
+    chart.render_to_file('sentiment.svg')
+    SVG(filename='sentiment.svg')
+
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         if sys.argv[1] == 'tweets':
