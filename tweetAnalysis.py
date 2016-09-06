@@ -1,6 +1,11 @@
 # Here for this project we will be analyzing Tweets about the
 # Presidential Candidates by word, tokenizing them, and then using
 # them to classify each overall tweet as either positive or negative
+# For the tweets here I have already classified 300 out of the 400
+# tweets as either positive, negative or neutral
+# This will allow the algorithm to be trained on 200 data points 
+# And tested on a test set of the remaining 100 data points
+# 100 of the data points are unlabeled and predicted with the algorithm
 # Here we will import the Scikit Learn libraries among others necessary
 
 import pandas as pd
@@ -9,8 +14,13 @@ import sys
 import random
 import numpy as np
 import time
+import twython
 from time import strftime
 #from pandas.DataFrame import query
+import matplotlib.pyplot as plt
+#import seaborn
+#import pygal
+from IPython.display import SVG
 
 import nltk
 from nltk import corpus
@@ -18,6 +28,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 nltk.download('punkt')
 nltk.download('stopwords')
+from nltk.twitter import Twitter
  
 from sklearn import datasets
 from sklearn.naive_bayes import GaussianNB
@@ -35,7 +46,8 @@ randomized_file = "randomized_tweets.csv"
 training_data = "training_data.csv"
 testing_data = "testing_data.csv"
 unlabeled_data = "unlabeled.csv"
-predicted_data = "predicted.csv"
+predicted_data_NB = "predicted_nb.csv"
+predicted_data_LSVM = "predicted_lsvm.csv"
 
 columns = [
     "row_id",
@@ -90,6 +102,20 @@ continuous_columns = []
 labels = []
 
 local_stopwords = []
+
+"""
+def get_tweets():
+    tw = Twitter()
+    
+    # Sample from the public stream based on keyword
+    tw.tweets(keywords='love, hate', limit=10) 
+    
+    # See what Donald Trump and Hillary Clinton are talking about
+    # respectively 
+    # Use numeric userIDs instead of handles
+    
+    tw.tweets(follow=['25073877', '1339835893'], limit=10) 
+"""
 
 def parse_csv():
     # Here we will parse a CSV file with the data on Row ID, Tweet ID,
@@ -212,15 +238,16 @@ def naive_bayes(x_train, y_train, x_test, y_test):
     """ Evaluate performance on test set """
     
     predicted = text_clf.predict(x_test)
-    #print("The accuracy of a Naive Bayes algorithm is: %d" % np.mean(predicted == y_test))
+    print("The accuracy of a Naive Bayes algorithm is: ") 
+    print(np.mean(predicted == y_test))
     #print("The accuracy of a Naive Bayes algorithm is: %d" % (1 - float(((y_test != predicted).sum()) / x_test.shape[0])))
-    print("Number of mislabeled points out of a total %d points : %d"
+    print("Number of mislabeled points out of a total %d points for the Naive Bayes algorithm : %d"
           % (x_test.shape[0],(y_test != predicted).sum()))
     
     # Tune parameters
     parameter_tuning(text_clf, x_train, y_train)
     # Predict unlabeled tweets
-    predict_unlabeled_tweets(text_clf)
+    predict_unlabeled_tweets(text_clf, predicted_data_NB)
 
 def linear_svm(x_train, y_train, x_test, y_test):
     """ Let's try a Linear Support Vector Machine (SVM) """
@@ -238,11 +265,13 @@ def linear_svm(x_train, y_train, x_test, y_test):
     predicted_two = text_clf_two.predict(x_test)
     print("The accuracy of a Linear SVM is: ")
     print(np.mean(predicted_two == y_test))
-    print("Number of mislabeled points out of a total %d points : %d"
+    print("Number of mislabeled points out of a total %d points for the Linear SVM algorithm: %d"
           % (x_test.shape[0],(y_test != predicted_two).sum()))
-
+    
+    # Tune parameters
     parameter_tuning(text_clf_two, x_train, y_train)
-
+    # Predict unlabeled tweets
+    predict_unlabeled_tweets(text_clf_two, predicted_data_LSVM)
 
 def parameter_tuning(text_clf, x_train, y_train):
     """ Classifiers can have many different parameters that can make the                                                                                                                   
@@ -271,7 +300,7 @@ def parameter_tuning(text_clf, x_train, y_train):
         target_names=twenty_test.target_names))                                                                                                                                                
         """
 
-def predict_unlabeled_tweets(classifier):
+def predict_unlabeled_tweets(classifier, output):
     # Make predictions
     unlabeled_tweets = pd.read_csv(unlabeled_data, names = unlabeled_columns)
     unlabeled_words = np.array(unlabeled_tweets["tweet"])
@@ -280,7 +309,7 @@ def predict_unlabeled_tweets(classifier):
     
     # Create new file for predictions
     # And utilize csv module to iterate through csv
-    predicted_tweets = csv.writer(open(predicted_data, "wb+"))
+    predicted_tweets = csv.writer(open(output, "wb+"))
     unlabeled_tweets = csv.reader(open(unlabeled_data, "rb+"))
     
     # Iterate through csv and get president and tweet
@@ -293,14 +322,27 @@ def predict_unlabeled_tweets(classifier):
         predicted_tweets.writerow([president] + [tweet] + [predictions[index]])
         index += 1
 
+def compare_predictions():
+    names = ["president", "tweet", "prediction"]
+    naive_bayes = pd.read_csv(predicted_data_NB, names = names) 
+    linear_svm = pd.read_csv(predicted_data_LSVM, names = names) 
 
+    naive_bayes_pred = np.array(naive_bayes["prediction"])
+    linear_svm_pred = np.array(linear_svm["prediction"])
+    
+    print("The precent similarity between a Multinomial Naive Bayes Algorithm and a Linear SVM algorithm with a SGD Classifier is: ")
+    print(np.mean(naive_bayes_pred == linear_svm_pred))
+    
 if __name__ == '__main__':
     if len(sys.argv) == 2:
-        if sys.argv[1] == 'parse':
+        if sys.argv[1] == 'tweets':
+            get_tweets()
+        elif sys.argv[1] == 'parse':
             parse_csv()
         elif sys.argv[1] == 'train':
             extract_and_train()
-        
+        elif sys.argv[1] == 'compare':
+            compare_predictions()
 
 
 
