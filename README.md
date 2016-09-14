@@ -45,7 +45,10 @@ STEPS REQUIRED
 
 Use the this code below:
 
-    python tweetAnalysis.py
+    python tweetAnalysis.py parse
+    python tweetAnalysis.py train
+    python tweetAnalysis.py compare
+    
 
 METHOD
 
@@ -57,9 +60,17 @@ METHOD
 
  - Look up SQL syntax if you are not familiar [here](
 
- -   
+ - Gather the necessary columns in this order ("row_id", "tweet_id", "timestamp", "president", "tweet", "label") and save the output as "tweets.csv"
+
+ - You can also extract other data and in a different order; just make sure to change the column data at the top of tweetAnalysis.py
+
+ - Now run the code above in the following order (or use the lovely Makefile, which does it all for you!)
 
 
-FINDINGS 
+GENERAL FINDINGS 
 
 It took Hillary 11 days to get to 200 tweets and Trump 16 days to get to 200 tweets
+
+The amount of positive tweets stayed relatively the same over the course of the week; negative and neutral tweets were all over the place
+
+Hillary's tweets were generally more neutral overall while Trump's were highly polarizing (positive or negative)
