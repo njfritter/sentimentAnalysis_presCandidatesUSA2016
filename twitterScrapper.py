@@ -22,10 +22,24 @@ from sqlalchemy.orm import mapper, sessionmaker
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Unicode, Float # importing Unicode is important! If not, you likely encounter data type error.
 from sqlalchemy.ext.declarative import declarative_base
 
-t = Twython(app_key = 'nHL6RdyZuqPAJ4VSrK48pUQCU',
-        app_secret = 'urwTOqQAVsTXCGu0tixUSxEs2zSfuZ5ptAVa2nA9qjQYi6cuG4',
-        oauth_token = '261933490-bNxEiTOkx89bsqCwgFxZVKxLwt8J3PYoOtrDVLlE',
-        oauth_token_secret = 'igONbEDQ1ohEekc5IqYJlrdeUWACKZBVKCo5XPwWP6Q88')
+key_file = open('api_keys.csv', 'r')
+app_key = key_file.readline().rstrip()
+app_secret = key_file.readline().rstrip()
+oauth_token = key_file.readline().rstrip()
+oauth_token_secret = key_file.readline().rstrip()
+
+key_file.close()
+print "consumer key: " + app_key
+print "consumer secret: " + app_secret
+print "access token: " + oauth_token
+print "access token secret: " + oauth_token_secret
+
+t = Twython(app_key = app_key,
+            app_secret = app_secret,
+            oauth_token = oauth_token,
+            oauth_token_secret = oauth_token_secret
+)
+
 
 Base = declarative_base()
 class TWEET(Base):
@@ -168,7 +182,7 @@ class ACCOUNT(Base):
 
 def get_data(kid):
     try:        
-        d = t.get_user_timeline(screen_name=kid, count="200", page="2", include_entities="true", include_rts="1")  #NEW LINE        
+        d = t.get_user_timeline(screen_name=kid, count="500", page="2", include_entities="true", include_rts="1")  #NEW LINE        
     
     except Exception, e:
         

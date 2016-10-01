@@ -41,28 +41,51 @@ The following dependences (in Python) are required to run this program:
 
 STEPS REQUIRED
 
+First run the following program:
+      
+      python twitterScraper.py
+
+This function will extract raw tweets using the Twitter API from the presidential 
+candidates, Donald Trump and Hillary Clinton. The tweet limit is currently set in 
+line 177; feel free to change this if you like (there is a tweet limit however).
+
 [Convert the .db file into a csv file](http://stackoverflow.com/questions/3286525/return-sql-table-as-json-in-python)
 
-Use the this code below:
+You need to download a SQL engine (such as DB for SQLite) in order to parse the .db file and turn it into a csv
+
+Once in there, run the following SQL command:
+
+     SELECT rowid, tweet_id, created_at, query, content, possibly_sensitive FROM output
+
+Once you do this, go and find the option to save the parse as a csv file (follow 
+instructions on how to do this depending on the SQL software you have). Save this file
+as "tweets.csv", then run the following code for analysis:
 
     python tweetAnalysis.py parse
     python tweetAnalysis.py train
     python tweetAnalysis.py compare
     
+There is also a "Makefile" with the same commands as above. You may also run:
+
+      make
+
+and you will get the same result. 
 
 METHOD
 
- - Scrape data from Twitter
+ - Scrape data from Twitter using the "twitterScraper.py" function
 
- - Output the data as a database file
+ - You will get a database (.db) file as "handles.db"
 
- - Using SQL software (MySQL, DB Browser for SQLite, etc.), extract the various columns which you are doing analysis on
+ - Using SQL software (MySQL, DB Browser for SQLite, etc.), look for "handles.db" and extract the various columns which you are doing analysis on
 
  - Look up SQL syntax if you are not familiar [here](
 
- - Gather the necessary columns in this order ("row_id", "tweet_id", "timestamp", "president", "tweet", "label") and save the output as "tweets.csv"
+ - Running the SQL command above will generate the desired features
 
- - You can also extract other data and in a different order; just make sure to change the column data at the top of tweetAnalysis.py
+ - The SQL command generates these features ("row_id", "tweet_id", "", "president", "tweet", "label") and save the output as "tweets.csv"
+
+ - You can also extract other data and in a different order; just make sure to change the "columns" data at the top of tweetAnalysis.py
 
  - Now run the code above in the following order (or use the lovely Makefile, which does it all for you!)
 
