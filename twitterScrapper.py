@@ -40,6 +40,10 @@ t = Twython(app_key = app_key,
             oauth_token_secret = oauth_token_secret
 )
 
+"""
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+"""
 
 Base = declarative_base()
 class TWEET(Base):
