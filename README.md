@@ -50,7 +50,7 @@ The following dependences (in Python) are required to run tweetAnalysis.py and t
     pprint
     simplejson
     sqlalchemy
-
+    configparser
 	
 ## STEPS REQUIRED
 
@@ -62,19 +62,27 @@ If you do not already have a Twitter Application to scrape tweets from the Twitt
 
 Once you have created your profile, click on "Keys and Access Tokens" and get the first two keys (Consumer Key and Consumer Secret). Keep these for the next step.
 
-First create a file called "api_keys.csv" with your keys in the following order:
-consumer key      
-consumer secret key
-access token
-secret access token
+### Create the necessary files
 
-Keep this file private (do NOT commit to Github). 
+First create a file called "api_keys.ini" with the following format, and input the following information without any additional characters (so no quotation marks for strings, etc.)
+
+[Twitter Keys]
+Consumer Key: 'YOUR CONSUMER KEY'
+Consumer Secret Key: 'YOUR CONSUMER SECRET KEY'
+Access Token: 'YOUR ACCESS TOKEN'
+Access Token Secret: 'YOUR ACCESS SECRET TOKEN'
+
+Keep this file private (do NOT commit to Github). The reason a .ini file is used is that Python's ConfigParser module is used to parse for the individual keys.
+
+### Scraping Twitter
 
 Next run the following program:
       
       python twitterScraper.py
 
 This function will extract raw tweets using the Twitter API from the presidential candidates, Donald Trump and Hillary Clinton. The tweet limit is currently set in line 177; feel free to change this if you like (there is a tweet limit however).
+
+### Downloading Database Software
 
 You need to download a SQL engine (such as DB for SQLite) in order to parse the .db file and turn it into a csv. Here is the link for SQLite below:
 
@@ -83,6 +91,8 @@ You need to download a SQL engine (such as DB for SQLite) in order to parse the 
 Assuming you are using SQLite, open the database file "handles.db", click in "Browse Data", switch the table to "output" and run the following SQL command:
 
      SELECT rowid, tweet_id, created_at, query, content, possibly_sensitive FROM output
+
+### Finally, the Analysis
 
 Once you do this, go and find the option to save the parse as a csv file (follow instructions on how to do this depending on the SQL software you have). For SQLite this option will be below whatever outputs from the above SQL command; save this file as "tweets.csv", then run the following code for analysis:
 
