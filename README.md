@@ -21,10 +21,14 @@ We used the following documentation to further educate ourselves through the pro
 
  - [Mining Twitter with Python - by CodeKitchen](http://web.mit.edu/aizhan/www/twitter_api_workshop/#/)
 
-  - This will give you an idea on the methods used for tokenizing text (we used "low-level tokenization" for this repo)
+## PICKING THE ALGORITHM
 
-  - [The Art of Tokenization](https://www.ibm.com/developerworks/community/blogs/nlp/entry/tokenization?lang=en)
+Sentiment Analysis has been a common topic of discussion ever since the explosion of data analytics onto the world, but how exactly can you take a tweet and determine whether it is positive or negative? How would one do this? Through a process called Tokenization. This process takes sentences as input and "tokenizes" them into individual words. This will give you an idea on the methods used for tokenizing text (we used "low-level tokenization" for this repo) and could explain it better than this repo could:
 
+[The Art of Tokenization](https://www.ibm.com/developerworks/community/blogs/nlp/entry/tokenization?lang=en)
+
+I hand labeled the first data set myself (leading to a labeled set with my biases), but have found a corpus of sentences labeled as positive and negative that
+I will be using to relabel the sentences and compare. This will be coming soon. The link to the corpus of words can be found [here](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences)
 
 ## DEPENDENCIES REQUIRED
 
@@ -50,7 +54,23 @@ The following dependences (in Python) are required to run tweetAnalysis.py and t
 	
 ## STEPS REQUIRED
 
-First run the following program:
+### Creating a Twitter Application
+
+This section is for those of you reading this that do not currently have a Twitter application with a set of API and Oauth keys. If you do have one already, please continue to the next section.
+
+If you do not already have a Twitter Application to scrape tweets from the Twitter API, please visit their (Applications Website)[https://apps.twitter.com/] and create a profile. It is recommended that you have a website that you can use as the "home" website but it is not necessary. 
+
+Once you have created your profile, click on "Keys and Access Tokens" and get the first two keys (Consumer Key and Consumer Secret). Keep these for the next step.
+
+First create a file called "api_keys.csv" with your keys in the following order:
+consumer key      
+consumer secret key
+access token
+secret access token
+
+Keep this file private (do NOT commit to Github). 
+
+Next run the following program:
       
       python twitterScraper.py
 
@@ -74,11 +94,11 @@ There is also a "Makefile" with the same commands as above. You may also run:
 
       make
 
-and you will get the same result as the three python commands above
+and the three python commands above will run in that order.
 
 ## METHOD
 
- - Scrape data from Twitter using the "twitterScraper.py" function
+ - Scrape data from Twitter using the "twitterScraper.py" function and 
 
  - You will get a database (.db) file as "handles.db"
 
