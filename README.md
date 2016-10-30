@@ -17,7 +17,7 @@ We used the following documentation to further educate ourselves through the pro
 
  - [Tensorflow Software via Google : Deep Learning Algorithms](https://www.tensorflow.org/)
 
-  - This tutorial was used to build twitterScraper.py, tweetsByHandle.py, handles.csv, and handles.db
+ - This tutorial was used to build twitterScraper.py, tweetsByHandle.py, handles.csv, and handles.db
 
  - [Mining Twitter with Python - by CodeKitchen](http://web.mit.edu/aizhan/www/twitter_api_workshop/#/)
 
@@ -28,7 +28,7 @@ Sentiment Analysis has been a common topic of discussion ever since the explosio
 [The Art of Tokenization](https://www.ibm.com/developerworks/community/blogs/nlp/entry/tokenization?lang=en)
 
 I hand labeled the first data set myself (leading to a labeled set with my biases), but have found a corpus of sentences labeled as positive and negative that
-I will be using to relabel the sentences and compare. This will be coming soon. The link to the corpus of words can be found [here](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences)
+I will be using to relabel the sentences and compare. This will be coming soon. The link to the corpus of words can be found [here](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences).
 
 ## DEPENDENCIES REQUIRED
 
@@ -58,7 +58,7 @@ The following dependences (in Python) are required to run tweetAnalysis.py and t
 
 This section is for those of you reading this that do not currently have a Twitter application with a set of API and Oauth keys. If you do have one already, please continue to the next section.
 
-If you do not already have a Twitter Application to scrape tweets from the Twitter API, please visit their (Applications Website)[https://apps.twitter.com/] and create a profile. It is recommended that you have a website that you can use as the "home" website but it is not necessary. 
+If you do not already have a Twitter Application to scrape tweets from the Twitter API, please visit their [Applications Website](https://apps.twitter.com/) and create a profile. It is recommended that you have a website that you can use as the "home" website but it is not necessary. 
 
 Once you have created your profile, click on "Keys and Access Tokens" and get the first two keys (Consumer Key and Consumer Secret). Keep these for the next step.
 
@@ -67,10 +67,14 @@ Once you have created your profile, click on "Keys and Access Tokens" and get th
 First create a file called "api_keys.ini" with the following format, and input the following information without any additional characters (so no quotation marks for strings, etc.)
 
 [Twitter Keys]
-Consumer Key: 'YOUR CONSUMER KEY'
-Consumer Secret Key: 'YOUR CONSUMER SECRET KEY'
-Access Token: 'YOUR ACCESS TOKEN'
-Access Token Secret: 'YOUR ACCESS SECRET TOKEN'
+
+Consumer Key: YOUR CONSUMER KEY
+
+Consumer Secret Key: YOUR CONSUMER SECRET KEY
+
+Access Token: YOUR ACCESS TOKEN
+
+Access Token Secret: YOUR ACCESS SECRET TOKEN
 
 Keep this file private (do NOT commit to Github). The reason a .ini file is used is that Python's ConfigParser module is used to parse for the individual keys.
 
@@ -106,6 +110,15 @@ There is also a "Makefile" with the same commands as above. You may also run:
 
 and the three python commands above will run in that order.
 
+You will get three graphs outputted:
+
+ - Tweet Sentiment of Both Presidential Candidates by Day of the Week
+
+ - Tweet Sentiment of Presidential Candidate Hillary Clinton by Day of the Week
+
+ - Tweet Sentiment of Presidential Candidate Donald Trump by Day of the Week
+
+Along with these, you will get nice Naive Bayes and Linear Support Vector Machine (SVM) algorithms. 
 ## METHOD
 
  - Scrape data from Twitter using the "twitterScraper.py" function and 

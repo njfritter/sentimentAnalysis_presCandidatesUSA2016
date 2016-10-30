@@ -101,6 +101,14 @@ pos_freq = np.zeros(7)
 neg_freq = np.zeros(7)
 neu_freq = np.zeros(7)
 
+pos_freq_trump = np.zeros(7)
+neg_freq_trump = np.zeros(7)
+neu_freq_trump = np.zeros(7)
+
+pos_freq_clinton = np.zeros(7)
+neg_freq_clinton = np.zeros(7)
+neu_freq_clinton = np.zeros(7)
+
 """
 def get_tweets():
     tw = Twitter()
@@ -151,6 +159,7 @@ def parse_csv():
             tokenize_row_write(unlabeled_file, row_id, tweet_id, raw_timestamp.tm_mon, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, "")
             continue
  
+   
         # Get frequencies of sentiment per day of week
         # Index values of array used for day of week
         if label == "positive":
@@ -160,6 +169,24 @@ def parse_csv():
         else:
             neu_freq[raw_timestamp.tm_wday] += 1
             
+        # Now do this for each candidate
+        if president == "HillaryClinton":
+            if label == "positive":
+                pos_freq_clinton[raw_timestamp.tm_wday] += 1
+            if label == "negative":
+                neg_freq_clinton[raw_timestamp.tm_wday] += 1
+            else:
+                neu_freq_clinton[raw_timestamp.tm_wday] += 1
+
+        if president == "realDonaldTrump":
+            if label == "positive":
+                pos_freq_trump[raw_timestamp.tm_wday] += 1
+            if label == "negative":
+                neg_freq_trump[raw_timestamp.tm_wday] += 1
+            else:
+                neu_freq_trump[raw_timestamp.tm_wday] += 1
+
+   
         if index % ratio == 0:
             tokenize_row_write(testing_file, row_id, tweet_id, raw_timestamp.tm_mon, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, label)
         else:
@@ -167,8 +194,13 @@ def parse_csv():
             
         index += 1
     
-    # Create data visualization
-    data_viz(pos_freq, neu_freq, neg_freq)
+    # Create data visualizations of
+    # Overall tweet sentiment by day of week
+    # Hillary's tweet sentiment by day of week    
+    # Trump's tweet sentiment by day of week    
+    data_viz(pos_freq, neu_freq, neg_freq, "")
+    data_viz(pos_freq_clinton, neu_freq_clinton, neg_freq_clinton, "Hillary Clinton")
+    data_viz(pos_freq_trump, neu_freq_trump, neg_freq_trump, "Donald Trump")
 
 def clean_word(word):
     return word not in stopwords.words('english') and word not in local_stopwords
@@ -186,8 +218,41 @@ def tokenize_row_write(file_csv_writer, row_id, tweet_id, month, day, hour, pres
     words_tweet = tokenized_string(tweet)
 
     file_csv_writer.writerow([row_id] + [tweet_id] + [month] + [day] + [hour] + [president]+ [words_tweet] + [label])
-   
-def data_viz(pos_freq, neu_freq, neg_freq):
+
+"""
+Since gathering the frequencies is a repetitive task
+Can we create a function for it???
+"""
+"""   
+def gather_freq(president, label, raw_timestamp):
+    if president == "HillaryClinton":
+        if label == "positive":
+            pos_freq_clinton[raw_timestamp.tm_wday] += 1
+        if label == "negative":
+            neg_freq_clinton[raw_timestamp.tm_wday] += 1
+        else:
+            neu_freq_clinton[raw_timestamp.tm_wday] += 1
+
+    if president == "realDonaldTrump":
+        if label == "positive":
+            pos_freq_trump[raw_timestamp.tm_wday] += 1
+        if label == "negative":
+            neg_freq_trump[raw_timestamp.tm_wday] += 1
+        else:
+            neu_freq_trump[raw_timestamp.tm_wday] += 1
+    
+    else:
+        # Get frequencies of sentiment per day of week
+        # Index values of array used for day of week
+        if label == "positive":
+            pos_freq[raw_timestamp.tm_wday] += 1
+        if label == "negative":
+            neg_freq[raw_timestamp.tm_wday] += 1
+        else:
+            neu_freq[raw_timestamp.tm_wday] += 1
+"""    
+
+def data_viz(pos_freq, neu_freq, neg_freq, president):
     
     print("Positive frequencies by day of the week are: ")
     print(pos_freq)
@@ -209,6 +274,12 @@ def data_viz(pos_freq, neu_freq, neg_freq):
     # Add the axis labels
     ax.set_ylabel("Sentiment")
     ax.set_xlabel("Day of Week")
+       
+    # Add title if the president argument is used
+    if len(president) > 0:
+        ax.set_title('Tweet Sentiment of Presidential Candidate {} by Day of the Week'.format(president))    
+    else:
+        ax.set_title('Tweet Sentiment of Both Presidential Candidates by Day of the Week')
 
     # Add legend
     blue_patch = mpatches.Patch(color = 'blue', label = 'Positive Tweets')
@@ -363,83 +434,6 @@ def compare_predictions():
     print("The precent similarity between a Multinomial Naive Bayes Algorithm and a Linear SVM algorithm with a SGD Classifier is: ")
     print(np.mean(naive_bayes_pred == linear_svm_pred))
 
-    plot_predictions(naive_bayes_pred)
-    plot_predictions(linear_svm_pred)
-
-
-def plot_predictions(predictions):    
-    """ 
-    Plot some stuff 
-    Here we will try a Horizontal Bar Chart 
-    Next a regular Pyplot 
-    
-    pos_sent = len([k for k in predictions if k == "positive"]) / len(predictions)
-    neg_sent = len([k for k in predictions if k == "negative"]) / len(predictions)
-    neu_sent = len([k for k in predictions if k == "neutral"]) / len(predictions)
-
-    chart = pygal.HorizontalBar()
-    chart.title = 'Positive, Negative & Neutral Sentiment'
-    chart.add('Positive', pos_sent * 100)
-    chart.add('Negative', neg_sent * 100)
-    chart.add('Neutral', neu_sent * 100)
-    chart.render_to_file('sentiment.svg')
-    SVG(filename='sentiment.svg')
-    """
-    '''
-def data_viz(train_set, test_set):
-    
-
-    Taken from: http://emptypipes.org/2013/11/09/matplotlib-multicategory-barchart/
-    Create a barchart for data across different categories with
-    multiple conditions for each category.
-    
-    @param ax: The plotting axes from matplotlib.
-    @param dpoints: The data set as an (n, 3) numpy array
-    
-    
-    # Aggregate the conditions and the categories according to their
-    # mean values
-    pos = [(c, np.mean(train_set[train_set[7] == "positive"][:,2].astype(float))) 
-                  for c in np.unique(train_set[3])]
-    neg = [(c, np.mean(train_set[train_set[7] == "negative"][:,2].astype(float))) 
-                  for c in np.unique(train_set[3])]
-    neu = [(c, np.mean(train_set[train_set[:,1] == c][:,2].astype(float))) 
-                  for c in np.unique(train_set[3])]
-    # sort the conditions, categories and data so that the bars in
-    # the plot will be ordered by category and condition
-    conditions = [c[0] for c in sorted(conditions, key=o.itemgetter(1))]
-    categories = [c[0] for c in sorted(categories, key=o.itemgetter(1))]
-    
-    dpoints = np.array(sorted(dpoints, key=lambda x: categories.index(x[1])))
-
-    # the space between each set of bars
-    space = 0.3
-    n = len(conditions)
-    width = (1 - space) / (len(conditions))
-    
-    ax = plt.subplot(111)
-    # Create a set of bars at each position
-    for i,cond in enumerate(conditions):
-        indeces = range(1, len(categories)+1)
-        vals = dpoints[dpoints[:,0] == cond][:,2].astype(np.float)
-        pos = [j - (1 - space) / 2. + i * width for j in indeces]
-        ax.bar(pos, vals, width=width, label=cond, 
-               color=cm.Accent(float(i) / n))
-    
-    # Set the x-axis tick labels to be equal to the categories
-    ax.set_xticks(indeces)
-    ax.set_xticklabels(categories)
-    plt.setp(plt.xticks()[1], rotation=90)
-    
-    # Add the axis labels
-    ax.set_ylabel("RMSD")
-    ax.set_xlabel("Structure")
-    
-    # Add a legend
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1], loc='upper left')
-
-'''    
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
