@@ -16,14 +16,8 @@ import numpy as np
 import time
 import twython
 from time import strftime
-#from pandas.DataFrame import query
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-"""
-import pygal
-from IPython.display import SVG
-import operator as o
-"""
 import nltk
 from nltk import corpus
 from nltk.corpus import stopwords
@@ -42,6 +36,12 @@ from sklearn.linear_model import SGDClassifier
 from sklearn import metrics
 from sklearn.grid_search import GridSearchCV
 
+#from pandas.DataFrame import query
+"""
+import pygal
+from IPython.display import SVG
+import operator as o
+"""
 
 file = "tweets.csv"
 randomized_file = "randomized_tweets.csv"

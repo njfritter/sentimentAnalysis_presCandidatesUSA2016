@@ -1,5 +1,16 @@
 # Sentiment Analysis on Presidential Candidates for election year 2016
 
+## TABLE OF CONTENTS
+
+* [Abstract](#Abstract)
+* [Additional Resources](#Additional-Resources)
+* [Picking The Algorithm](#Picking-The-Algorithm)
+* [Dependencies Required](#Dependencies-Required)
+* [Steps Required](#Steps-Required)
+* [The Findings](#And-now-the-Analysis)
+* [Methodology](#Method)
+* [General Findings](#General-Findings])
+
 ## ABSTRACT
 
 This project focuses on classifying tweets (source: [twitter](https://twitter.com)) of the 2016 candidates for presidency to the United States: Hillary Clinton (Democrat) and Donald Trump (Republican) into two classes: positive or negative. Natural language processing (NLP) is used in the context of the Python programming language -- we focus on leveraging the [NLTK package](http://www.nltk.org/). 
@@ -96,7 +107,7 @@ Assuming you are using SQLite, open the database file "handles.db", click in "Br
 
      SELECT rowid, tweet_id, created_at, query, content, possibly_sensitive FROM output
 
-### Finally, the Analysis
+### And now the Analysis
 
 Once you do this, go and find the option to save the parse as a csv file (follow instructions on how to do this depending on the SQL software you have). For SQLite this option will be below whatever outputs from the above SQL command; save this file as "tweets.csv", then run the following code for analysis:
 
@@ -119,6 +130,7 @@ You will get three graphs outputted:
  - Tweet Sentiment of Presidential Candidate Donald Trump by Day of the Week
 
 Along with these, you will get nice Naive Bayes and Linear Support Vector Machine (SVM) algorithms. 
+
 ## METHOD
 
  - Scrape data from Twitter using the "twitterScraper.py" function and 
