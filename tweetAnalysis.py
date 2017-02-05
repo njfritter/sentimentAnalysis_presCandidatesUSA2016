@@ -38,6 +38,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
 from sklearn import metrics
 from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import cross_val_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_selection import SelectKBest, chi2
 
@@ -472,17 +473,17 @@ def research_train():
     print("\nThe results using Amazon reviews are:")
     naive_bayes(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
     linear_svm(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
-    #neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
+    neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
     
     print("\nThe results using IMDB reviews are:")
     naive_bayes(imdb_train_words, imdb_y_train, imdb_test_words, imdb_y_test)
     linear_svm(imdb_train_words, imdb_y_train, imdb_test_words, imdb_y_test)
-    #neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
+    neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
 
     print("\nThe results using Yelp reviews are:")
     naive_bayes(yelp_train_words, yelp_y_train, yelp_test_words, yelp_y_test)
     linear_svm(yelp_train_words, yelp_y_train, yelp_test_words, yelp_y_test)
-    #neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
+    neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
 
 def tokenize_row_write_research(file_csv_writer, number, review, label):
     
@@ -570,10 +571,15 @@ def neural_network(x_train, y_train, x_test, y_test):
 
     plt.show()
     """
-    
+
     # Tune parameters and predict unlabeled tweets
-    parameter_tuning(text_clf_three, x_train, y_train)
+    print("Predicting unlabeled")
     predict_unlabeled_tweets(text_clf_three, predicted_data_MLP)
+    print("Tuning parameters")
+    scores = cross_val_score(text_clf_three, x_train, y_train, cv = 5)
+    print(scores)
+    print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    #parameter_tuning(text_clf_three, x_train, y_train)
 
 def parameter_tuning(text_clf, x_train, y_train):
     """ 
@@ -585,10 +591,10 @@ def parameter_tuning(text_clf, x_train, y_train):
                   'tfidf__use_idf': (True, False),
                   'clf__alpha': (1e-2, 1e-3),
                   }
-    
+
     gs_clf = GridSearchCV(text_clf, parameters, n_jobs=-1)
-    
     gs_clf = gs_clf.fit(x_train, y_train)
+
     
     best_parameters, score, _ = max(gs_clf.grid_scores_, key=lambda x: x[1])
     for param_name in sorted(parameters.keys()):
