@@ -16,8 +16,11 @@ import numpy as np
 import time
 import twython
 from time import strftime
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import re
 import nltk
 from nltk import corpus
 from nltk.corpus import stopwords
@@ -35,6 +38,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
 from sklearn import metrics
 from sklearn.grid_search import GridSearchCV
+from sklearn.neural_network import MLPClassifier
+from sklearn.feature_selection import SelectKBest, chi2
 
 #from pandas.DataFrame import query
 
@@ -46,6 +51,7 @@ testing_data = "testing_data.csv"
 unlabeled_data = "unlabeled.csv"
 predicted_data_NB = "predicted_nb.csv"
 predicted_data_LSVM = "predicted_lsvm.csv"
+predicted_data_MLP = "predicted_mlp.csv"
 amazon_reviews = "sentimentLabelledSentences/amazonLabelled.csv"
 imdb_reviews = "sentimentLabelledSentences/imdbLabelled.csv"
 yelp_reviews = "sentimentLabelledSentences/yelpLabelled.csv"
@@ -144,21 +150,22 @@ def parse_csv():
     # Here we will parse a CSV file with the data on Row ID, Tweet ID,
     # Timestamp, President, Tweet
 
-    training_file = csv.writer(open(training_data, "wb+"))
-    testing_file = csv.writer(open(testing_data, "wb+"))
-    unlabeled_file = csv.writer(open(unlabeled_data, "wb+"))
+    training_file = csv.writer(open(training_data, "wt+"))
+    testing_file = csv.writer(open(testing_data, "wt+"))
+    unlabeled_file = csv.writer(open(unlabeled_data, "wt+"))
         
     # Now to randomize the data; this is how
     # Gotten from Github: 
     # (http://stackoverflow.com/questions/4618298/randomly-mix-lines-of-3-million-line-file)
-    with open(file, 'rb') as source:
+    with open(file, 'rt') as source:
         data = [ (random.random(), line) for line in source ]
     data.sort()
-    with open(randomized_file, 'wb+') as target:
+    with open(randomized_file, 'wt+') as target:
         for _, line in data:
             target.write( line )
     
-    prepped_tweet_file = csv.reader(open(randomized_file, "rb"))
+    prepped_tweet_file = csv.reader(open(randomized_file, "rt"))
+    #prepped_tweet_file = open(randomized_file, "rt", encoding = "utf-8">)
     index = 0
 
     # Now we will iterate through the randomized file and extract data
@@ -204,6 +211,13 @@ def parse_csv():
                 neu_freq_trump[raw_timestamp.tm_wday] += 1
 
    
+        # Before we write our tweets to the files, let's remove all hyperlinks 
+        # Gotten from this url http://stackoverflow.com/questions/11331982/how-to-remove-any-url-within-a-string-in-python
+        # Maybe here too??
+        # http://billchambers.me/tutorials/2015/01/14/python-nlp-cheatsheet-nltk-scikit-learn.html
+        tweet = re.sub(r"(?:\@|https?\://)\S+", "", tweet)
+
+        # Now write to files
         if index % ratio == 0:
             tokenize_row_write(testing_file, row_id, tweet_id, raw_timestamp.tm_mon, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, label)
         else:
@@ -247,11 +261,11 @@ def data_viz(pos_freq, neu_freq, neg_freq, president):
         print(neg_freq)
 
     else:
-        print("Positive frequencies by day of the week for candidate {} are: ").format(president)
+        print("Positive frequencies by day of the week for candidate {} are: ".format(president))
         print(pos_freq)
-        print("Neutral frequencies by day of the week for candidate {} are: ").format(president)
+        print("Neutral frequencies by day of the week for candidate {} are: ".format(president))
         print(neu_freq)
-        print("Negative frequencies by day of the candidate {} week are: ").format(president)
+        print("Negative frequencies by day of the candidate {} week are: ".format(president))
         print(neg_freq)
         
     #Plot a multibar graph 
@@ -265,7 +279,7 @@ def data_viz(pos_freq, neu_freq, neg_freq, president):
     ax.autoscale(tight=True)
 
     # Add the axis labels
-    ax.set_ylabel("Sentiment")
+    ax.set_ylabel("Frequencies of Sentiment")
     ax.set_xlabel("Day of Week")
        
     # Add title if the president argument is used
@@ -298,7 +312,7 @@ def extract_and_train():
     
     # Show unique labels
     unique, counts = np.unique(y_train[0], return_counts=True)
-    print np.asarray((unique, counts)).T
+    print(np.asarray((unique, counts)).T)
 
     # Extract features from text files
     count_vect = CountVectorizer()
@@ -320,9 +334,10 @@ def extract_and_train():
     for words, category in zip(test_words, predicted):
         print('%r => %s' % (words, category))
 
-    # Call a Naive Bayes and Linear SVM algorithm on the data
+    # Call a Naive Bayes, a Linear SVM and a Neural Network algorithm on the data
     naive_bayes(train_words, y_train, test_words, y_test)
     linear_svm(train_words, y_train, test_words, y_test)
+    neural_network(train_words, y_train, test_words, y_test)
 
 def research_split():
     # Train based on the researcher labeled corpus
@@ -338,38 +353,38 @@ def research_split():
     # Also had to do some MAJOR data reformatting
     # Link used here: 
     # http://stackoverflow.com/questions/32127604/how-to-wrap-each-line-in-quotes-in-sublimetext
-    amazon_file = csv.reader(open(amazon_reviews, "rb+"))
-    imdb_file = csv.reader(open(imdb_reviews, "rb+"))
-    yelp_file = csv.reader(open(yelp_reviews, "rb+"))
+    amazon_file = csv.reader(open(amazon_reviews, "rt+"))
+    imdb_file = csv.reader(open(imdb_reviews, "rt+"))
+    yelp_file = csv.reader(open(yelp_reviews, "rt+"))
 
     # Files to be written
-    amazon_train_file = csv.writer(open(amazon_training_data, "wb+"))
-    amazon_test_file = csv.writer(open(amazon_testing_data, "wb+"))
-    imdb_train_file = csv.writer(open(imdb_training_data, "wb+"))
-    imdb_test_file = csv.writer(open(imdb_testing_data, "wb+"))
-    yelp_train_file = csv.writer(open(yelp_training_data, "wb+"))
-    yelp_test_file = csv.writer(open(yelp_testing_data, "wb+"))
+    amazon_train_file = csv.writer(open(amazon_training_data, "wt+"))
+    amazon_test_file = csv.writer(open(amazon_testing_data, "wt+"))
+    imdb_train_file = csv.writer(open(imdb_training_data, "wt+"))
+    imdb_test_file = csv.writer(open(imdb_testing_data, "wt+"))
+    yelp_train_file = csv.writer(open(yelp_training_data, "wt+"))
+    yelp_test_file = csv.writer(open(yelp_testing_data, "wt+"))
 
     """
     # Randomize data
     with open(amazon_file, 'rb') as source:
         data = [ (random.random(), line) for line in source ]
     data.sort()
-    with open(randomized_amazon_file, 'wb+') as target:
+    with open(randomized_amazon_file, 'wt+') as target:
         for _, line in data:
             target.write( line )
 
     with open(imdb_file, 'rb') as source:
         data = [ (random.random(), line) for line in source ]
     data.sort()
-    with open(randomized_imdb_file, 'wb+') as target:
+    with open(randomized_imdb_file, 'wt+') as target:
         for _, line in data:
             target.write( line )
 
     with open(yelp_file, 'rb') as source:
         data = [ (random.random(), line) for line in source ]
     data.sort()
-    with open(randomized_yelp_file, 'wb+') as target:
+    with open(randomized_yelp_file, 'wt+') as target:
         for _, line in data:
             target.write( line )
     
@@ -457,14 +472,17 @@ def research_train():
     print("\nThe results using Amazon reviews are:")
     naive_bayes(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
     linear_svm(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
+    #neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
     
     print("\nThe results using IMDB reviews are:")
     naive_bayes(imdb_train_words, imdb_y_train, imdb_test_words, imdb_y_test)
     linear_svm(imdb_train_words, imdb_y_train, imdb_test_words, imdb_y_test)
-    
+    #neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
+
     print("\nThe results using Yelp reviews are:")
     naive_bayes(yelp_train_words, yelp_y_train, yelp_test_words, yelp_y_test)
     linear_svm(yelp_train_words, yelp_y_train, yelp_test_words, yelp_y_test)
+    #neural_network(amazon_train_words, amazon_y_train, amazon_test_words, amazon_y_test)
 
 def tokenize_row_write_research(file_csv_writer, number, review, label):
     
@@ -475,6 +493,7 @@ def naive_bayes(x_train, y_train, x_test, y_test):
     # Building a Pipeline; this does all of the work in extract_and_train() at once  
     text_clf = Pipeline([('vect', CountVectorizer()),
                          ('tfidf', TfidfTransformer()),
+                         ('chi2', SelectKBest(chi2, k = 'all')),
                          ('clf', MultinomialNB()),
                          ])
  
@@ -496,13 +515,14 @@ def linear_svm(x_train, y_train, x_test, y_test):
 
     text_clf_two = Pipeline([('vect', CountVectorizer()),
                              ('tfidf', TfidfTransformer()),
+                             ('chi2', SelectKBest(chi2, k = 'all')),
                              ('clf', SGDClassifier(
                                  loss='hinge',
                                  penalty='l2',
                                  alpha=1e-3,
                                  n_iter=5,
                                  random_state=42)),
-    ])
+                            ])
     text_clf_two = text_clf_two.fit(x_train, y_train)
     predicted_two = text_clf_two.predict(x_test)
     print("The accuracy of a Linear SVM is: ")
@@ -513,6 +533,47 @@ def linear_svm(x_train, y_train, x_test, y_test):
     # Tune parameters and predict unlabeled tweets
     parameter_tuning(text_clf_two, x_train, y_train)
     predict_unlabeled_tweets(text_clf_two, predicted_data_LSVM)
+
+def neural_network(x_train, y_train, x_test, y_test):
+    """ Now let's try one of the most powerful algorithms: An Artifical Neural Network (ANN) """
+
+    text_clf_three = Pipeline([('vect', CountVectorizer()),
+                                ('tfidf', TfidfTransformer()),
+                                ('chi2', SelectKBest(chi2, k = 'all')),
+                                ('clf', MLPClassifier(
+                                        hidden_layer_sizes=(100,), 
+                                        max_iter=10, 
+                                        alpha=1e-4,
+                                        solver='sgd', 
+                                        verbose=10, 
+                                        tol=1e-4, 
+                                        random_state=1,
+                                        learning_rate_init=.1)),
+                                ])
+
+    text_clf_three.fit(x_train, y_train)
+    print("Training set score: %f" % text_clf_three.score(x_train, y_train))
+    print("Test set score: %f" % text_clf_three.score(x_test, y_test))
+
+    """
+    fig, axes = plt.subplots(4, 4)
+    # use global min / max to ensure all weights are shown on the same scale
+    vmin, vmax = text_clf_three.coefs_[0].min(), text_clf_three.coefs_[0].max()
+    for coef, ax in zip(text_clf_three.coefs_[0].T, axes.ravel()):
+        ax.matshow(coef.reshape(28, 28), 
+                    cmap=plt.cm.gray, 
+                    vmin=.5 * vmin,
+                    vmax=.5 * vmax)
+
+        ax.set_xticks(())
+        ax.set_yticks(())
+
+    plt.show()
+    """
+    
+    # Tune parameters and predict unlabeled tweets
+    parameter_tuning(text_clf_three, x_train, y_train)
+    predict_unlabeled_tweets(text_clf_three, predicted_data_MLP)
 
 def parameter_tuning(text_clf, x_train, y_train):
     """ 
@@ -549,8 +610,8 @@ def predict_unlabeled_tweets(classifier, output):
     
     # Create new file for predictions
     # And utilize csv module to iterate through csv
-    predicted_tweets = csv.writer(open(output, "wb+"))
-    unlabeled_tweets = csv.reader(open(unlabeled_data, "rb+"))
+    predicted_tweets = csv.writer(open(output, "wt+"))
+    unlabeled_tweets = csv.reader(open(unlabeled_data, "rt+"))
     
     # Iterate through csv and get president and tweet
     # Add prediction to end
