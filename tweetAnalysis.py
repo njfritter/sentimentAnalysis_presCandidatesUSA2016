@@ -22,6 +22,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import re
 import nltk
+from wordcloud import WordCloud
+from os import path
 from nltk import corpus
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
@@ -46,6 +48,9 @@ from sklearn.feature_selection import SelectKBest, chi2
 
 # Here are the files we will be manipulating and creating
 file = "tweets.csv"
+tweets_tokenized = "tweet_data.txt"
+clinton_tokenized = "clinton_tweets.txt"
+trump_tokenized = "trump_tweets.txt"
 randomized_file = "randomized_tweets.csv"
 training_data = "training_data.csv"
 testing_data = "testing_data.csv"
@@ -169,15 +174,28 @@ def parse_csv():
     #prepped_tweet_file = open(randomized_file, "rt", encoding = "utf-8">)
     index = 0
 
+    # Make file holding tokenized tweets
+    tokenized_tweets = open(tweets_tokenized, 'wt+')
+    tokenized_clinton = open(clinton_tokenized, 'wt+')
+    tokenized_trump = open(trump_tokenized, 'wt+')
+
     # Now we will iterate through the randomized file and extract data
     # We need to get rid of the decimal points in the seconds columns
     # And then split up the data (2/3 train and 1/3 test)
     # And obtain frequencies as well
-    
+
     for row in prepped_tweet_file:
         (row_id, tweet_id, timestamp, president, tweet, label) = row
         raw_timestamp = time.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
         ratio = 3
+
+        # Before we write our tweets to the files, let's remove all hyperlinks 
+        # Then write this tweet to the words only file
+        # Gotten from this url http://stackoverflow.com/questions/11331982/how-to-remove-any-url-within-a-string-in-python
+        # Maybe here too??
+        # http://billchambers.me/tutorials/2015/01/14/python-nlp-cheatsheet-nltk-scikit-learn.html
+        tweet = re.sub(r"(?:\@|https?\://)\S+", "", tweet)
+        tokenized_tweets.write(tweet)
         
         # Take care of unlabeled data
         if label == "1":
@@ -195,7 +213,10 @@ def parse_csv():
             neu_freq[raw_timestamp.tm_wday] += 1
             
         # Now do this for each candidate
+        # And while we're at it write each tweet to a separate .txt file
+        # To make word clouds
         if president == "HillaryClinton":
+            tokenized_clinton.write(tweet)
             if label == "positive":
                 pos_freq_clinton[raw_timestamp.tm_wday] += 1
             if label == "negative":
@@ -204,19 +225,13 @@ def parse_csv():
                 neu_freq_clinton[raw_timestamp.tm_wday] += 1
 
         if president == "realDonaldTrump":
+            tokenized_trump.write(tweet)
             if label == "positive":
                 pos_freq_trump[raw_timestamp.tm_wday] += 1
             if label == "negative":
                 neg_freq_trump[raw_timestamp.tm_wday] += 1
             else:
                 neu_freq_trump[raw_timestamp.tm_wday] += 1
-
-   
-        # Before we write our tweets to the files, let's remove all hyperlinks 
-        # Gotten from this url http://stackoverflow.com/questions/11331982/how-to-remove-any-url-within-a-string-in-python
-        # Maybe here too??
-        # http://billchambers.me/tutorials/2015/01/14/python-nlp-cheatsheet-nltk-scikit-learn.html
-        tweet = re.sub(r"(?:\@|https?\://)\S+", "", tweet)
 
         # Now write to files
         if index % ratio == 0:
@@ -248,6 +263,7 @@ def tokenized_string(sent):
 # csv file
 def tokenize_row_write(file_csv_writer, row_id, tweet_id, month, day, hour, president, tweet, label):
     words_tweet = tokenized_string(tweet)
+    # Write each tweet to the tokenized tweets file
 
     file_csv_writer.writerow([row_id] + [tweet_id] + [month] + [day] + [hour] + [president]+ [words_tweet] + [label])
 
@@ -297,6 +313,27 @@ def data_viz(pos_freq, neu_freq, neg_freq, president):
 
     plt.show() 
  
+def word_cloud(tokenized_tweet_file):
+    
+    #import pdb; pdb.set_trace()
+    direc = path.dirname(__file__)
+    text = open(path.join(direc, tokenized_tweet_file)).read()
+    
+
+    # Generate word cloud image
+    wordcloud = WordCloud().generate(text)
+    
+    # Display plots 
+    plt.imshow(wordcloud, interpolation = 'bilinear')
+    plt.axis("off")
+
+    # Lower max font size
+    wordcloud = WordCloud(max_font_size = 40).generate(text)
+    plt.figure()
+    plt.imshow(wordcloud, interpolation = 'bilinear')
+    plt.axis("off")
+    plt.show()
+
 def extract_and_train():
     # Train based on my labeled dataset (which does contain my bias)
     train = pd.read_csv(training_data, names = train_columns)
@@ -308,9 +345,10 @@ def extract_and_train():
     x_test = np.array((test['row_id'], test['tweet_id'], test['month'], test['day'], test['hour'], test['president'], test['tweet']))
     y_test = np.array(test['label'])
     
+    # Make words
     train_words = np.array(train['tweet'])
     test_words = np.array(test['tweet'])
-    
+
     # Show unique labels
     unique, counts = np.unique(y_train[0], return_counts=True)
     print(np.asarray((unique, counts)).T)
@@ -652,6 +690,10 @@ if __name__ == '__main__':
             extract_and_train()
         elif sys.argv[1] == 'compare':
             compare_predictions()
+        elif sys.argv[1] == 'wordcloud':
+            word_cloud(tweets_tokenized)
+            word_cloud(clinton_tokenized)
+            word_cloud(trump_tokenized)
     if len(sys.argv) == 3:
         if sys.argv[1] == 'research':
             if sys.argv[2] == 'split':
