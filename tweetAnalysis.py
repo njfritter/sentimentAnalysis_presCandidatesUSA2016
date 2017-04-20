@@ -27,8 +27,6 @@ from os import path
 from nltk import corpus
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
-nltk.download('punkt')
-nltk.download('stopwords')
 from nltk.twitter import Twitter
  
 from sklearn import datasets
@@ -124,7 +122,10 @@ research_columns = [
 
 labels = []
 
-local_stopwords = []
+local_stopwords = [
+    "rt", 
+    "amp"
+    ]
 
 pos_freq = np.zeros(7)
 neg_freq = np.zeros(7)
@@ -139,6 +140,12 @@ neg_freq_clinton = np.zeros(7)
 neu_freq_clinton = np.zeros(7)
 
 """
+# Make file holding tokenized tweets
+# Can't think of anywhere else to put em
+tokenized_tweets = open(tweets_tokenized, 'wt+')
+tokenized_clinton = open(clinton_tokenized, 'wt+')
+tokenized_trump = open(trump_tokenized, 'wt+')
+
 def get_tweets():
     tw = Twitter()
     
@@ -174,11 +181,6 @@ def parse_csv():
     #prepped_tweet_file = open(randomized_file, "rt", encoding = "utf-8">)
     index = 0
 
-    # Make file holding tokenized tweets
-    tokenized_tweets = open(tweets_tokenized, 'wt+')
-    tokenized_clinton = open(clinton_tokenized, 'wt+')
-    tokenized_trump = open(trump_tokenized, 'wt+')
-
     # Now we will iterate through the randomized file and extract data
     # We need to get rid of the decimal points in the seconds columns
     # And then split up the data (2/3 train and 1/3 test)
@@ -195,8 +197,7 @@ def parse_csv():
         # Maybe here too??
         # http://billchambers.me/tutorials/2015/01/14/python-nlp-cheatsheet-nltk-scikit-learn.html
         tweet = re.sub(r"(?:\@|https?\://)\S+", "", tweet)
-        tokenized_tweets.write(tweet)
-        
+
         # Take care of unlabeled data
         if label == "1":
             tokenize_row_write(unlabeled_file, row_id, tweet_id, raw_timestamp.tm_mon, raw_timestamp.tm_wday, raw_timestamp.tm_hour, president, tweet, "")
@@ -216,7 +217,6 @@ def parse_csv():
         # And while we're at it write each tweet to a separate .txt file
         # To make word clouds
         if president == "HillaryClinton":
-            tokenized_clinton.write(tweet)
             if label == "positive":
                 pos_freq_clinton[raw_timestamp.tm_wday] += 1
             if label == "negative":
@@ -225,7 +225,6 @@ def parse_csv():
                 neu_freq_clinton[raw_timestamp.tm_wday] += 1
 
         if president == "realDonaldTrump":
-            tokenized_trump.write(tweet)
             if label == "positive":
                 pos_freq_trump[raw_timestamp.tm_wday] += 1
             if label == "negative":
@@ -262,8 +261,27 @@ def tokenized_string(sent):
 # Tokenize the title and description, then write everything to the corresponding
 # csv file
 def tokenize_row_write(file_csv_writer, row_id, tweet_id, month, day, hour, president, tweet, label):
+    # Tokenize tweets
     words_tweet = tokenized_string(tweet)
+
     # Write each tweet to the tokenized tweets file
+    # The clinton and the trump file
+    # This is for the wordcloud
+    if president == "HillaryClinton":
+        with open(clinton_tokenized, 'a') as source:
+            for word in words_tweet:
+                source.write(word + ' ')
+            source.write("\n")
+    if president == "realDonaldTrump":
+        with open(trump_tokenized, 'a') as source:
+            for word in words_tweet:
+                source.write(word + ' ')
+            source.write("\n")
+
+    with open(tweets_tokenized, 'a') as source:
+        for word in words_tweet:
+            source.write(word + ' ')
+        source.write("\n")
 
     file_csv_writer.writerow([row_id] + [tweet_id] + [month] + [day] + [hour] + [president]+ [words_tweet] + [label])
 
@@ -315,17 +333,20 @@ def data_viz(pos_freq, neu_freq, neg_freq, president):
  
 def word_cloud(tokenized_tweet_file):
     
+    # TAKEN from https://github.com/amueller/word_cloud
+    # I deserve no credit
     #import pdb; pdb.set_trace()
     direc = path.dirname(__file__)
     text = open(path.join(direc, tokenized_tweet_file)).read()
     
-
+    """
     # Generate word cloud image
     wordcloud = WordCloud().generate(text)
     
     # Display plots 
     plt.imshow(wordcloud, interpolation = 'bilinear')
     plt.axis("off")
+    """
 
     # Lower max font size
     wordcloud = WordCloud(max_font_size = 40).generate(text)
